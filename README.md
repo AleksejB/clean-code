@@ -1,5 +1,5 @@
 # Clean Code
-The following will be summaries of the chapters in Clean Code by Uncle Bob. The aim is to summarise each chapter, which will contain the key concepts of the chapter, along with examples that will illustrate them.
+The following will be summaries of the chapters in Clean Code by Uncle Bob. The aim is to summarise each chapter, which will contain the key concepts of the chapter, along with examples (where applicable) that will illustrate them.
 
 ## Chapter 1: Clean Code
 Let's take an example mentioned in the book, about a (nameless) company who has released a great and popular app in the 80s. They hit the ground running, the development was fast and they were making a great product; until some point. The development speed decreased, bugs were not fixed and eventually this company went out of buisness. Why? Because at the start of the project the developers didn't take the time to build a clean, maintenable system (according to one of the early stage developer of the project). Keyword being clean, as clean code makes the code base easy to change and understand. Clean code unsures that productivity will not end up plummeting.
