@@ -203,4 +203,10 @@ A team of developers should agree upon a single formatting style, and then every
 
 ## Chapter 7: Error Handling
 
+
 ## Chapter 8: Boundaries
+Often it is required to work with a thrid party API, for the sake of cleanliness of the code the boundaries must be clealy defined. Boundaries are the lines of seperation between our world (our codebase) and a thrid-party world (codebase). These boundaries may expose more that what the client wants and is concerned with. This gives more control to the client, which can lead to mistakes and bugs. 
+
+We want to define boundaries as a layer of abstration on top of the existing boundaries. To expose only the functionality that is needed by the client. A good example of this woule be using interfaces as a boundary between our system and a thrid party library. If the library provides fine control over it's system, and those methods are directly used, then the boundaries between the thrid library system and our system blend together. Risking a need for a huge refactor job if the implementation details of the thrid party library change. However, if the boundries were defined clearly between the thrid party library and our system, (for example, through the use of an interface), then there would only be a need to change the implementation of the interface instead of changing how our system functions.
+
+Clear boundries are also useful when working with a non existent third party library or API. The boundary would allow our system to be built and functional as it would be possible to design the interface for the non existent system to interact with ours and then to implement the existing system in such away that it would conform to our interface.
