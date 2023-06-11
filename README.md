@@ -64,5 +64,31 @@ So which is it? Is the function doing one thing or three things? Notice that the
 
 The same principle can be followed down into the function. If at each step the functions will look like the ones described above, then functions will small and there will be no duplication. 
 
-However, a good function is not just a small function, without duplication that does one thing well. The function also should clearly express its intent (naming was discussed in Chapter 2 summary).
+However, a good function is not just a small function, without duplication that does one thing well. The function also should clearly express its intent (naming was discussed in Chapter 2 summary). And the less arguments the better.
 
+## Chapter 4: Comments
+Comments are not like Schindler’s List. They are not “pure good.” Indeed, comments are, at best, a necessary evil. If our programming languages were expressive enough, or if we had the talent to subtly wield those languages to express our intent, we would not need comments very much — perhaps not at all. The proper use of comments is to compensate for our failure to express ourself in code. We must have them because we cannot always figure out how to express ourselves without them, but their use is not a cause for celebration. 
+
+Som why are comments so bad? Because they lie. Not always, and not intentionally, but too often. The older a comment is, and the farther away it is from the code it describes, the more likely it is to be just plain wrong. The reason is simple. Programmers can’t realistically maintain them. So, as a general rule of thumb, whenever there is a need for a comment, the code should be rewritten to better relate the meaning of function, class, variable, constant, etc. Comments do not make up for bad code.
+
+Here are some example of comments in code, and how they can be improved:
+
+```
+// Returns an instance of the Responder being tested.
+protected abstract fun responderInstance(): Responder?
+```
+
+Instead of writing the above comment, the fucntion could have been named `responderBeingTested`.
+
+```
+// Check to see if the employee is eligible for full benefits
+if ((employee.flags && HOURLY_FLAG) && (employee.age > 65)) 
+```
+
+And instead of the comment above, the if statment can be rewritten as `if (employee.isEligibleForFullBenefits())`
+
+However, not all comments are bad. There are legal comments which sometimes must be present, todo comments which are needed for orgonisation and some comments when expressing the intent through code was failed. Best to have no comments (and writing good code that doesn't require that). If that cannot be done, then comments can be acceptable, but that introduces a responsibilty to all developers to properly maintain the comments.
+
+Lastly, commented out code. Do not do it. If there is uncommented code left in the codebase, it will confuse developers as to why it is there, and should it remain there. If some code is commented out, there must be a comment explaining why it is commented out, however again it introduces responsibilty for developers to maintain the comments.
+
+## Chapter 5: Formatting
