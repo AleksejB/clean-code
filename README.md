@@ -92,3 +92,115 @@ However, not all comments are bad. There are legal comments which sometimes must
 Lastly, commented out code. Do not do it. If there is uncommented code left in the codebase, it will confuse developers as to why it is there, and should it remain there. If some code is commented out, there must be a comment explaining why it is commented out, however again it introduces responsibilty for developers to maintain the comments.
 
 ## Chapter 5: Formatting
+
+##### Vertical formatting
+Let's consider a newspaper acrticle. It is read from top to bottom. At the top the headline is expected, letting the reader know what the article is about. The first paragraph gives a synopsis of the whole story. As the reader keeps on reading, the details increase until the reader is made aware of all dates, names, quotes, claims and other minutia. A source file should be no different. The name should be simple
+but explanatory. The name, by itself, should be sufficient to tell the reader whether they are in the right module or not. The topmost parts of the source file should provide the high-level concepts and algorithms. Detail should increase as the reader moves downward, until at the end where they would find the lowest level functions and details in the source file.
+
+Let's take a look at this more practically. Consider the following example:
+```
+class BoldWidget(parent: ParentWidget?, text: String?) : ParentWidget(parent) {
+
+    init {
+        val match: Matcher = pattern.matcher(text)
+        match.find()
+        addChildWidgets(match.group(1))
+    }
+
+    @Throws(Exception::class)
+    fun render(): String {
+        val html = StringBuffer("<b>")
+        html.append(childHtml()).append("</b>")
+        return html.toString()
+    }
+
+    companion object {
+        const val REGEXP = "'''.+?'''"
+        private val pattern: Pattern = Pattern.compile(
+            "'''(.+?)'''",
+            Pattern.MULTILINE + Pattern.DOTALL
+        )
+    }
+}
+```
+As the reader looks at the code above, their attention is drawn to the top of each block (first line after a blank line), indicating a new thought has begun. If we were to take out the blank lines, the readability of the code drops drastically:
+```
+class BoldWidget(parent: ParentWidget?, text: String?) : ParentWidget(parent) {
+    init {
+        val match: Matcher = pattern.matcher(text)
+        match.find()
+        addChildWidgets(match.group(1))}
+    @Throws(Exception::class)
+    fun render(): String {
+        val html = StringBuffer("<b>")
+        html.append(childHtml()).append("</b>")
+        return html.toString()}
+    companion object {
+        const val REGEXP = "'''.+?'''"
+        private val pattern: Pattern = Pattern.compile(
+            "'''(.+?)'''",
+            Pattern.MULTILINE + Pattern.DOTALL
+        )}
+}
+```
+
+The seperate thoughts in the code start to blend together. Causing extra effort to be expended everytime the user wants to refresh their knowledge of the code.
+
+If openess seperates concepts, then vertical density implies close association. So lines of code that are tightly related should appear vertically dense. Let's take a look at the following:
+```
+class ReporterConfig {
+    /**
+     * The class name of the reporter listener
+     */
+    private var className: String = ""
+    /**
+     * The properties of the reporter listener
+     */
+    private val properties = listOf<Property>()
+    
+    fun addProperty(property: Property) {
+        properties.add(property)
+    }
+}
+```
+The comments increase the space between the 2 variables, making them seem less related to each other. And the `properties` variable now seems to be somehow to the function. If instead we had:
+```
+class ReporterConfig {
+
+    private var className: String = ""
+    private val properties = listOf<Property>()
+    
+    fun addProperty(property: Property) {
+        properties.add(property)
+    }
+}
+```
+This is much easier to digest, it is more streamlined. And requires less effort to understand it. 
+
+Concepts that are closely related should be kept vertically close to each other. Clearly this rule doesn’t work for concepts that belong in separate files. But then closely related concepts should not be separated into different files unless there is a very good reason. For those concepts that are so closely related that they belong in the same source file, their vertical separation should be a measure of how important each is to the understandability of the other. We want to avoid forcing our readers to hop around through our source files and classes.
+
+In general function call dependencies should point in the downward direction. That is, a function that is called should be below a function that does the calling. This creates a nice flow down the source code module from high level to low level. As in newspaper articles, most important concepts come first, and are expressed with the least amount of polluting detail. Low-level details come last. This allows the reader to skim source files, getting the gist from the first few functions, without having to immerse themselfes in the details.
+
+##### Horizontal formatting
+Horizontal white space is used to associate things that are strongly related and disassociate
+things that are more weakly related. Consider the following function:
+```
+private fun measureLine(line: String) {
+    lineCount++
+    val lineSize = line.length
+    totalChars += lineSize
+    lineWidthHistogram.addLine(lineSize, lineCount)
+    recordWidestLine(lineSize)
+}
+```
+The assignment operators are surrounded with white space to accentuate them. Assignment
+statements have two distinct and major elements: the left side and the right side. The
+spaces make that separation obvious. On the other hand, there are no spaces between the function name and the opening parenthesis. This is because the function and its arguments are closely related. Separating them makes them appear disjoined instead of conjoined.
+
+A team of developers should agree upon a single formatting style, and then every member of that team should use that style.
+
+## Chapter 6: Objects and Data Structures
+
+## Chapter 7: Error Handling
+
+## Chapter 8: Boundaries
