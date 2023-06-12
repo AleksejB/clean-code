@@ -200,9 +200,132 @@ spaces make that separation obvious. On the other hand, there are no spaces betw
 A team of developers should agree upon a single formatting style, and then every member of that team should use that style.
 
 ## Chapter 6: Objects and Data Structures
+What is the difference between objects and data structures? Objects hide their data behind abstractions and expose functions that operate on that data. Data structure expose their data and have no meaningful functions. Let's illustrate the above statment with a couple of examples:
+First example:
+```
+class Point {
+    var x = 0.0
+    var y = 0.0
+}
+```
+This is a data structure. It exposes data.
+```
+interface Point {
+    val x: Double
+    val y: Double
+
+    fun setCartesian(x: Double, y: Double)
+    val r: Double
+    val theta: Double
+
+    fun setPolar(r: Double, theta: Double)
+}
+```
+This is an object, it hides the data behind a layer of abstration. It has functions to forcing the client to operate on the data in a defined way. Whereas in the `Point` class, the x and y coordinates can be set seperately. The object can have any implementation, it might be using cartesian coordinates, might use polar or some other newly invented coordinate system. One cannot tell just by looking at the object, the data structure is hidden behind a layer of abstraction. 
+
+Another, more subtle example, is:
+```
+interface Vehicle {
+    val fuelTankCapacityInGallons: Double
+    val gallonsOfGasoline: Double
+}
+```
+and
+```
+interface Vehicle {
+    val percentFuelRemaining: Double
+}
+```
+The first code snipper directly exposes the capacity and current amount of gallons, which are just getters for the variables. In the second code snippet, percentage of the fuel level is exposed, which is a layer of abstraction on `fuelTankCapacityInGallons` and `gallonsOfGasoline`.
+
+Objects expose behavior and hide data. This makes it easy to add new kinds of objects without changing existing behaviors. It also makes it hard to add new behaviors to existing objects. Data structures expose data and have no significant behavior. This makes it easy to add new behaviors to existing data structures but makes it hard to add new data structures to existing functions.
 
 ## Chapter 7: Error Handling
+Clean code is readable, but it must also be robust. These are not conflicting goals. We can write robust clean code if we see error handling as a separate concern, something that is viewable independently of our main logic. To the degree that we are able to do that, we can reason about it independently, and we can make great strides in the maintainability of our code. Let's take a look at things that will help us do so.
 
+When defining exception classes in an application, the most important concern should be how they are caught. Let's look at an example: 
+```
+val port: ACMEPort = ACMEPort(12)
+        
+    try {
+        port.open()
+    } catch (e: DeviceResponseException) {
+        reportPortError(e)
+        logger.log("Device response exception", e)
+    } catch (e: ATM1212UnlockedException) {
+        reportPortError(e)
+        logger.log("Unlock exception", e)
+    } catch (e: GMXError) {
+        reportPortError(e)
+        logger.log("Device response exception")
+    } finally {
+        ...
+    }
+```
+The above statment contains a lot of duplication. This is not surpising, in most exception handling situations, the work that is done is relatively standard regardless of the actual cause. The error has to be recorded and the program should be able to proceed. Because it is known that the work that is being done is roughly the same regardless of the exception, the code can be simplified considerably by wrapping the API that is called and making sure that it returns a common exception type.
+```
+val port: LocalPort = LocalPort(12)
+
+try {
+    port.open()
+} catch (e: PortDeviceFailure) {
+    reportError(e)
+    logger.log(e.getMessage(), e)
+} finally {
+    ...
+}
+```
+LocalPort class is just a simple wrapper that catches and translates exceptions thrown by the ACMEPort class:
+```
+class LocalPort(portNumber: Int) {
+    private val innerPort: ACMEPort
+
+    init { innerPort = ACMEPort(portNumber) }
+
+    fun open() {
+        try {
+            innerPort.open()
+        } catch (e: DeviceResponseException) {
+            throw PortDeviceFailure(e)
+        } catch (e: ATM1212UnlockedException) {
+            throw PortDeviceFailure(e)
+        } catch (e: GMXError) {
+            throw PortDeviceFailure(e)
+        }
+    }
+}
+```
+Wrappers like the one defined for ACMEPort can be very useful. In fact, wrapping third-party APIs is a best practice. When a third-party API is wraped, it minimizes the
+dependencies on it. The switch to a different library can happen without much penalty. Wrapping also makes it easier to mock out third-party calls when testing code. One final advantage of wrapping is that one isn’t tied to a particular vendor’s API design choices. One can define an API that suites them. In the example above, a single exception type was defined for port device failure which resulted in much cleaner code. Often a single exception class is fine for a particular area of code. The information sent with the exception can distinguish the errors. Different classes shoule be used only if the desired behaviour is to catch one excpetion, while letting another to propagate further.
+
+Another useful tool is the special case pattern. Let’s take a look at an example. This code that sums up expenses in a billing application:
+```
+try {
+    val expenses: MealExpenses = expenseReportDAO.getMeals(employee.getID())
+    total += expenses.getTotal()
+} catch (e: MealExpensesNotFound) {
+    total += getMealPerDiem()
+}
+```
+In this business, if meals are expensed, they become part of the total. If they aren’t, the employee gets a meal per diem amount for that day. The exception seperates the main buisness logic. It would be much simpler if the `getMeals` function did not throw the error. If it didn't, the code could be written like so:
+```
+val expenses: MealExpenses = expenseReportDAO.getMeals(employee.getID())
+total += expenses.getTotal()
+```
+This can be achieved by changing the `ExpenseReportDAO` so that it always returns a `MealExpense` object. If there are no meal expenses, it returns a MealExpense object that returns the per diem as its total. So cleaner code can be written if the exceptions are handled at a lower level (where possible).
+
+Do not return null. Returning null intriduces the need for not null checks and the posibility of NPEs being thrown. Consider the following code snippet:
+```
+val employees: List<Employee>? = getEmployees()
+employees?.let { employeesNotNull ->
+    employeesNotNull.forEach { employee -> totalPay += employee.pay } 
+}
+```
+Because `getEmployees()` method can return null, we must permorn a not null check before doing anything with the list. If instead `getEmployees()` returned an empty list instead of null, then the code could be simplified to the following:
+```
+val employees: List<Employee> = getEmployees()
+employees.forEach { totalPay += it.pay }
+```
 
 ## Chapter 8: Boundaries
 Often it is required to work with a thrid party API, for the sake of cleanliness of the code the boundaries must be clealy defined. Boundaries are the lines of seperation between our world (our codebase) and a thrid-party world (codebase). These boundaries may expose more that what the client wants and is concerned with. This gives more control to the client, which can lead to mistakes and bugs. 
